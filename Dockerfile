@@ -1,19 +1,26 @@
-# Use the official Python image
-FROM python:3.9-slim-buster
+# Use full Debian-based Python image (not slim)
+FROM python:3.9-buster
 
-RUN apt-get update -qq && apt-get -y install ffmpeg
+# Prevent interactive prompts
+ENV DEBIAN_FRONTEND=noninteractive
 
-# Set the working directory in the container
+# Update and install ffmpeg properly
+RUN apt-get update && \
+    apt-get install -y ffmpeg && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Set working directory
 WORKDIR /app
 
-# Copy the dependencies file to the working directory
+# Copy requirements first
 COPY requirements.txt .
 
-# Install any needed dependencies specified in requirements.txt
+# Install python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the application code to the working directory
+# Copy project files
 COPY . .
 
-# Command to run the application
+# Run bot
 CMD ["python", "bot.py"]
